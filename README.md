@@ -41,3 +41,6 @@ void loop(){ loop1(); }
 把mqtt.html上传至手机，用浏览器打开并收藏或者添加到桌面，方便下次使用。
 
 把mqtt主题复制到这里，点连接会自动订阅这个主题，并搜索该主题下的所有设备。
+
+![alt text](https://github.com/aiplayuser/esp12wifi/blob/main/image1.PNG)
+![alt text](https://github.com/aiplayuser/esp12wifi/blob/main/image2.PNG)
