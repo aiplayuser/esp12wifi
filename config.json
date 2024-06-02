@@ -1,7 +1,7 @@
 {
     "ssid": "esp8266",
     "pass": "",
-    "topic": "administrator",
+    "topic": "fdsfgsdfgergdfsgrdfs",
     "mqttserver": [
         "broker.hivemq.com",
         "test.mosquitto.org",

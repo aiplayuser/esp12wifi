@@ -12,13 +12,13 @@
     #include "ESP8266WebServer.h" //web服务
     ESP8266WebServer webserver(80); //web对象 
     #define espmodel "Esp12" //芯片类型
-    #define leddark 1 //熄灭板载led
+    #define leddark 1 //这个led太刺眼了，不想让他一直亮着。
 #elif defined(ESP32)   
     #include "WiFi.h" //wifi服务
     #include "WebServer.h" //web服务
     WebServer webserver(80); //web对象
     #define espmodel "Esp32" //芯片类型
-    #define leddark 0 //熄灭板载led
+    #define leddark 0 //这个led太刺眼了，不想让他一直亮着。
 #endif
 
 File file; DNSServer dnsserver; WiFiClient wificlient; PubSubClient mqttclient(wificlient); DynamicJsonDocument doc(22222); //json对象占用内存计算麻烦，自己估算吧！
@@ -51,7 +51,7 @@ void homepage(){ String html = httphead() + String(espmodel) + "-" + espid + "-"
         Dir dir=SPIFFS.openDir("/"); while(dir.next()){ html+="<form action=/delone method=post><a href="+dir.fileName()+">"+dir.fileName()+"</a>--"+dir.fileSize();
                                                         html+="<input name=mingzi style=width:0px value="+dir.fileName()+"><input type=submit value=删除></form><p>";} 
     #elif defined(ESP32)
-        file = SPIFFS.open("/", "r"); while(File entry = file.openNextFile()){ 
+        file = SPIFFS.open("/", "r"); while(File entry = file.openNextFile()){  //我的esp32有点问题，没有过多测试。
                                   html+="<form action=/delone method=post><a href="+String(entry.name())+">"+String(entry.name())+"</a>--"+String(entry.size());
                                   html+="<input name=mingzi style=width:0px value="+String(entry.name())+"><input type=submit value=删除></form><p>"; entry.close(); } file.close();
     #endif
@@ -75,10 +75,10 @@ String getChip() { uint8_t mac[6]; WiFi.macAddress(mac);
 String gettype(String path){ if( path.endsWith(".htm") || path.endsWith(".html") ) return "text/html"; 
     else if(path.endsWith(".json")) return "text/json"; return "application/octet-stream"; } //获取文件类型
 
-void setup1(String otapass){ Serial.begin(9600); Serial.println("\nbegin"); pinMode(0,INPUT_PULLUP); pinMode(2,OUTPUT); SPIFFS.begin(); espid=getChip(); //初始化系统
+void setup1(){ Serial.begin(9600); Serial.println("\nbegin"); pinMode(0,INPUT_PULLUP); pinMode(2,OUTPUT); SPIFFS.begin(); espid=getChip(); //初始化系统
 
     rjson("/config.json"); ssid=doc["ssid"].as<String>(); pass=doc["pass"].as<String>(); topic=doc["topic"].as<String>(); mqttserver=doc["mqttserver"][0].as<String>(); cjson(); 
-    if(ssid=="null")ssid=espid; if(pass=="null")pass=""; if(topic=="null")topic="administrator"; if(mqttserver=="null")mqttserver="broker.hivemq.com";  //读取config
+    if(ssid=="null")ssid=espid; if(pass=="null")pass=""; if(topic=="null")topic="jkdajdlsfhwdsjahweufsd"; if(mqttserver=="null")mqttserver="broker.hivemq.com";  //读取config
 
     WiFi.mode(WIFI_AP_STA); WiFi.softAP(ssid,pass); WiFi.begin(); webserver.begin(); dnsserver.start(53,"*",IPAddress(192,168,4,1)); //开始所有服务
 
@@ -96,7 +96,7 @@ void setup1(String otapass){ Serial.begin(9600); Serial.println("\nbegin"); pinM
         
     webserver.on("/again",again); //重新启动系统
     webserver.on("/setap",[](){ ssid=webserver.arg("ssid"); pass=webserver.arg("pass"); topic=webserver.arg("topic"); mqttserver=webserver.arg("mqttserver"); rjson("/config.json"); 
-               doc["ssid"]=ssid; doc["pass"]=pass; doc["topic"]=topic; doc["mqttserver"][0]=mqttserver; wjson("/config.json"); WiFi.softAP(ssid,pass); homepage(); } ); //重设ap密码
+               doc["ssid"]=ssid; doc["pass"]=pass; doc["topic"]=topic; doc["mqttserver"][0]=mqttserver; wjson("/config.json"); WiFi.softAP(ssid,pass); homepage(); } ); //重新配置config
 
     webserver.on("/setsta",[](){ WiFi.begin(webserver.arg("ssid"),webserver.arg("pass")); WiFi.persistent(1); homepage(); } ); //连接路由器
     webserver.on("/scanap",[](){ String html=httphead(); int n=WiFi.scanNetworks(); for(int i=0;i>-100;i--){ for(int j=0;j<n;j++){if(WiFi.RSSI(j)==i){ html+="<form action=/setsta method=post>";
