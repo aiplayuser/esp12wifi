@@ -1,0 +1,15 @@
+{
+    "ssid": "esp8266",
+    "pass": "",
+    "topic": "administrator",
+    "mqttserver": [
+        "broker.hivemq.com",
+        "test.mosquitto.org",
+        "broker.emqx.io"
+    ],
+    "WebSockets": [
+        "ws://broker.hivemq.com:8000/mqtt",
+        "ws://test.mosquitto.org:8080/mqtt",
+        "ws://broker.emqx.io:8083/mqtt"
+    ]
+}

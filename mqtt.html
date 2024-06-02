@@ -1,0 +1,59 @@
+<!DOCTYPE html><html><head><meta charset=UTF-8><style>a{text-decoration:none}</style><meta name=viewport content="width=device-width,initial-scale=1.1"></head><body><p></p>
+    
+    mqtt服务器选择<br><select id="server"><option>ws://broker.hivemq.com:8000/mqtt</option>
+                                         <option>ws://test.mosquitto.org:8080/mqtt</option>
+                                         <option>ws://broker.emqx.io:8083/mqtt</option></select><p></p>
+    
+    ------<button id="connectBtn" onclick="connectMQTT()">连接</button>------<button id="disconnectBtn" disabled="disabled" onclick="connectEND()">已断开</button>------<p></p>
+
+    <input type="text" id="topic" value=""></br>
+
+    <input type="text" id="message" list="mqtt-message" value="get">  
+        <datalist id="mqtt-message">  
+            <option value="get"></option>  
+            <option value="get"></option>  
+            <option value="get"></option>  
+        </datalist> <p></p>
+
+    <button onclick="sendMessage()">发送消息</button><p></p>
+    
+    <div id="syslogs"  style="resize:none; border:1px solid #ccc; padding:5px; overflow-y:auto; height:300px; width: 233px;"></div>
+    
+  </body>
+
+  <script src=" https://unpkg.com/mqtt@5.3.4/dist/mqtt.min.js"></script>
+  <!-- <script src="mqtt.min.js"></script> -->
+
+  <script> var client; var clientID = randomID();
+  
+    getid('topic').value = localStorage.getItem('mqttTopic') || "administrator"; 
+
+    function getid(idname){ return document.getElementById(idname); }
+
+    function printlog(logstr){ var syslogs = document.getElementById("syslogs"); 
+        syslogs.innerHTML += `${logstr}<br>`; syslogs.scrollTop = syslogs.scrollHeight; }
+
+    function randomID(){ return Array.from( {length:11}, () => Math.floor(Math.random() * 10)).join(''); } 
+    
+    function button(buttonsta){ buttonsta ? subtopic() : printlog("与mqtt服务器连接已断开"); 
+        getid("connectBtn").disabled = buttonsta;  
+        getid("connectBtn").innerHTML = buttonsta ? "已连接" : "连接"; 
+        getid("disconnectBtn").disabled = !buttonsta;  
+        getid("disconnectBtn").innerHTML = buttonsta ? "断开" : "已断开";     }  
+
+	function connectMQTT(){ 
+        client = mqtt.connect( getid("server").value, {clientID: clientID, keepalive: 60 } ); 
+        client.stream.on('error', function(err) { printlog(err); connectEND(); } )
+        client.on('connect',function(packet){button(1)} )         }
+        
+	function connectEND(){ client.end();button(0) }
+    
+    function sendMessage(){ 
+        client && client.connected ? client.publish( getid('topic').value, getid("message").value ) : printlog("连接已断开重新连接------"); }
+        
+	function subtopic(){ var topic = getid('topic').value || "administrator"; client.subscribe(topic); 
+        printlog( getid("server").value + "<br>clientID:" + clientID + "<br>已定阅主题:" + topic );
+        client.on('message', function(topic,message){ printlog(message) } ); 
+        localStorage.setItem('mqttTopic', topic ); client.publish( topic, "正在查找设备" ); }
+
+  </script></html>
